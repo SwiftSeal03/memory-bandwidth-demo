@@ -1,0 +1,7 @@
+{
+  "files.associations": {
+    "*.hcl": "python",
+    "arm_sve.h": "c",
+    "stddef.h": "c"
+  }
+}
