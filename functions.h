@@ -7,6 +7,10 @@
 
 #include <stddef.h>
 
+#ifdef __ARM_FEATURE_SVE
+void write_memory_sve(void*, size_t);
+#endif
+
 #ifdef __SSE4_1__
 void write_memory_nontemporal_sse(void*, size_t);
 void write_memory_sse(void*, size_t);

@@ -17,20 +17,12 @@
 #include <immintrin.h>
 #endif
 
+#ifdef __ARM_FEATURE_SVE
+#include <arm_sve.h>
+#endif
+
 void write_memory_memset(void* array, size_t size) {
   memset(array, 0xff, size);
-}
-
-void write_memory_rep_stosq(void* buffer, size_t size) {
-  asm("cld\n"
-      "rep stosq"
-      : : "D" (buffer), "c" (size / 8), "a" (0) );
-}
-
-void read_memory_rep_lodsq(void* buffer, size_t size) {
-  asm("cld\n"
-      "rep lodsq"
-       : : "S" (buffer), "c" (size / 8) : "%eax");
 }
 
 void write_memory_loop(void* array, size_t size) {
@@ -53,6 +45,21 @@ void read_memory_loop(void* array, size_t size) {
   // away.
   assert(val != 0xdeadbeef);
 }
+
+#ifdef __ARM_FEATURE_SVE
+void write_memory_sve(void* array, size_t size) {
+  uint64_t* carray = (uint64_t*) array;
+  uint64_t val = 1;
+  svbool_t pg = svptrue_b64();
+  svuint64_t seg;
+  svuint64_t vals = svdup_n_u64(val);
+  uint64_t seglen = svlen_u64(seg);
+
+  for (size_t i = 0; i < size / sizeof(uint64_t); i += seglen) {
+    svst1_u64(pg, &carray[i], vals);
+  }
+}
+#endif
 
 #ifdef __SSE4_1__
 void write_memory_nontemporal_sse(void* array, size_t size) {
